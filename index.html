@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="DailyFlow"/>
+<meta name="theme-color" content="#2563EB"/>
+<meta name="description" content="日曆任務、番茄鐘、習慣打卡三合一"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icons/icon-192x192.png"/>
+<title>每日任務 DailyFlow</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css"/>
+<style>
+:root {
+  --blue:#2563EB; --blue-dk:#1D4ED8; --blue-lt:#DBEAFE;
+  --green-lt:#D1FAE5; --green-dk:#065F46;
+  --red:#EF4444; --amber:#F59E0B;
+  --bg:#F8FAFC; --surface:#FFFFFF; --border:#E2E8F0;
+  --text:#1E293B; --text2:#64748B; --text3:#94A3B8;
+  --radius:12px; --radius-sm:8px;
+  --shadow:0 1px 3px rgba(0,0,0,.08);
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#0F172A; --surface:#1E293B; --border:#334155;
+    --text:#F1F5F9; --text2:#94A3B8; --text3:#64748B;
+    --blue-lt:#1E3A8A; --green-lt:#064E3B; --green-dk:#6EE7B7;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:15px}
+.app{display:flex;flex-direction:column;height:100dvh;max-width:480px;margin:0 auto;background:var(--surface)}
+
+/* HEADER */
+.header{background:var(--blue);color:#fff;padding:env(safe-area-inset-top,12px) 20px 14px;flex-shrink:0}
+.header-inner{display:flex;align-items:center;justify-content:space-between;padding-top:env(safe-area-inset-top,0)}
+.header h1{font-size:19px;font-weight:600;letter-spacing:-0.3px}
+.header-sub{font-size:12px;opacity:.8;margin-top:2px}
+.header-actions{display:flex;gap:6px}
+.hdr-btn{background:rgba(255,255,255,.18);border:none;border-radius:8px;padding:6px 8px;color:#fff;cursor:pointer;font-size:18px;line-height:1}
+
+/* TABS */
+.tab-bar{display:flex;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;cursor:pointer;font-size:11px;color:var(--text2);border-bottom:2.5px solid transparent;transition:.2s;user-select:none}
+.tab i{font-size:22px}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:500}
+
+/* SCROLL CONTENT */
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.section{display:none}
+.section.active{display:block}
+
+/* CALENDAR */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;padding:14px 20px 8px}
+.cal-month{font-size:16px;font-weight:600}
+.nav-btn{background:none;border:none;cursor:pointer;color:var(--text2);padding:6px 10px;border-radius:var(--radius-sm);font-size:16px}
+.nav-btn:active{background:var(--bg)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);padding:0 12px 4px}
+.dow{text-align:center;font-size:11px;color:var(--text3);padding:4px 0;font-weight:500}
+.cal-day{display:flex;flex-direction:column;align-items:center;padding:5px 2px;cursor:pointer;border-radius:var(--radius-sm)}
+.cal-day:active{background:var(--bg)}
+.day-num{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:13px}
+.cal-day.today .day-num{background:var(--blue);color:#fff;font-weight:600}
+.cal-day.selected:not(.today) .day-num{background:var(--blue-lt);color:var(--blue);font-weight:600}
+.day-dot{width:4px;height:4px;border-radius:50%;background:var(--red);margin-top:2px}
+.day-dot.hidden{visibility:hidden}
+
+/* TASKS */
+.tasks-wrap{padding:14px 20px}
+.section-label{font-size:12px;color:var(--text2);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+.task-item{display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;cursor:pointer;transition:.15s}
+.task-item:active{opacity:.7}
+.chk{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.2s}
+.chk.done{background:var(--blue);border-color:var(--blue)}
+.chk.done::after{content:'';display:block;width:9px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translateY(-1px)}
+.task-body{flex:1;min-width:0}
+.task-name{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task-name.done{text-decoration:line-through;color:var(--text2)}
+.tag{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500;white-space:nowrap}
+.tag-work{background:#DBEAFE;color:#1D4ED8}
+.tag-life{background:var(--green-lt);color:var(--green-dk)}
+.tag-health{background:#FCE7F3;color:#9D174D}
+.empty-state{text-align:center;padding:32px 20px;color:var(--text3)}
+.empty-state i{font-size:40px;display:block;margin-bottom:8px}
+.add-btn{display:flex;align-items:center;gap:8px;width:calc(100% - 40px);margin:0 20px 20px;padding:12px 16px;border:1.5px dashed var(--border);border-radius:var(--radius);background:none;color:var(--text2);cursor:pointer;font-size:14px;transition:.2s}
+.add-btn:active{background:var(--bg)}
+
+/* FOCUS */
+.focus-wrap{padding:20px 20px 32px;display:flex;flex-direction:column;align-items:center;gap:20px}
+.mode-pills{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.pill{padding:8px 18px;border-radius:20px;font-size:13px;cursor:pointer;border:1px solid var(--border);color:var(--text2);background:var(--surface);transition:.2s;user-select:none}
+.pill.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.ring-wrap{position:relative;width:220px;height:220px}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:var(--border);stroke-width:12}
+.ring-fill{fill:none;stroke:var(--blue);stroke-width:12;stroke-linecap:round;transition:stroke-dashoffset .5s linear}
+.ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-time{font-size:42px;font-weight:300;letter-spacing:-2px;color:var(--text)}
+.ring-mode{font-size:13px;color:var(--text2);margin-top:4px}
+.pom-dots{display:flex;gap:8px}
+.pdot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:.3s}
+.pdot.done{background:var(--blue)}
+.focus-btns{display:flex;align-items:center;gap:16px}
+.fb{width:50px;height:50px;border-radius:50%;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;color:var(--text2);transition:.2s}
+.fb:active{background:var(--bg)}
+.fb.main{width:66px;height:66px;background:var(--blue);border-color:var(--blue);color:#fff;font-size:28px}
+.fb.main:active{background:var(--blue-dk)}
+.focus-task{width:100%;background:var(--bg);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;border:1px solid var(--border)}
+.focus-task:active{opacity:.7}
+.focus-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%}
+.fstat{background:var(--bg);border-radius:var(--radius);padding:14px;text-align:center;border:1px solid var(--border)}
+.fstat-val{font-size:26px;font-weight:500}
+.fstat-lbl{font-size:12px;color:var(--text2);margin-top:2px}
+
+/* HABIT */
+.habit-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 20px 4px}
+.habit-week{display:flex;gap:6px;padding:8px 20px 12px;overflow-x:auto}
+.wday{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:38px}
+.wd-lbl{font-size:11px;color:var(--text3)}
+.wd-n{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text2)}
+.wd-n.today{background:var(--blue);color:#fff;font-weight:600}
+.habit-cards{padding:0 16px 80px}
+.hcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px}
+.hcard-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.hicon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.hinfo{flex:1}
+.hname{font-size:14px;font-weight:600}
+.hstreak{font-size:12px;color:var(--text2);margin-top:2px}
+.hchk-btn{width:34px;height:34px;border-radius:50%;border:2px solid var(--border);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:transparent;transition:.2s;flex-shrink:0}
+.hchk-btn.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.week-checks{display:flex;gap:5px;margin-bottom:8px}
+.wc{width:24px;height:24px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;transition:.2s;color:transparent}
+.wc.done{background:var(--blue-lt);border-color:#93C5FD;color:var(--blue)}
+.wc.today-marker{border-width:2px;border-color:var(--blue)}
+.pbar{height:4px;background:var(--bg);border-radius:2px;overflow:hidden}
+.pfill{height:100%;background:var(--blue);border-radius:2px;transition:width .4s}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;z-index:100;opacity:0;pointer-events:none;transition:.25s}
+.overlay.show{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border-radius:20px 20px 0 0;padding:24px 20px calc(24px + env(safe-area-inset-bottom,0px));width:100%;transform:translateY(40px);transition:.25s}
+.overlay.show .modal{transform:none}
+.modal h3{font-size:17px;font-weight:600;margin-bottom:16px}
+.modal input,.modal select{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:15px;background:var(--bg);color:var(--text);margin-bottom:12px;outline:none}
+.modal input:focus,.modal select:focus{border-color:var(--blue)}
+.modal-btns{display:flex;gap:10px;margin-top:4px}
+.mbtn{flex:1;padding:13px;border-radius:var(--radius-sm);border:none;cursor:pointer;font-size:15px;font-weight:500}
+.mbtn.cancel{background:var(--bg);color:var(--text2)}
+.mbtn.confirm{background:var(--blue);color:#fff}
+
+/* TOAST */
+.toast{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%) translateY(20px);background:#1E293B;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;z-index:200}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* BOTTOM NAV SAFE AREA */
+.tab-bar{padding-bottom:env(safe-area-inset-bottom,0px)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div class="header-inner">
+      <div>
+        <h1 id="hdr-title">每日任務 DailyFlow</h1>
+        <div class="header-sub" id="hdr-sub">今天有任務待完成</div>
+      </div>
+      <div class="header-actions">
+        <button class="hdr-btn" onclick="showNotifPrompt()" aria-label="通知"><i class="ti ti-bell"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <div class="tab active" onclick="switchTab('cal',this)" role="tab" aria-selected="true">
+      <i class="ti ti-calendar"></i>日曆
+    </div>
+    <div class="tab" onclick="switchTab('focus',this)" role="tab">
+      <i class="ti ti-clock"></i>專注
+    </div>
+    <div class="tab" onclick="switchTab('habit',this)" role="tab">
+      <i class="ti ti-checks"></i>習慣
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- CALENDAR TAB -->
+    <div class="section active" id="tab-cal">
+      <div class="cal-nav">
+        <button class="nav-btn" onclick="changeMonth(-1)" aria-label="上個月"><i class="ti ti-chevron-left"></i></button>
+        <span class="cal-month" id="cal-lbl"></span>
+        <button class="nav-btn" onclick="changeMonth(1)" aria-label="下個月"><i class="ti ti-chevron-right"></i></button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div class="tasks-wrap">
+        <div class="section-label" id="task-lbl">今天的任務</div>
+        <div id="task-list"></div>
+      </div>
+      <button class="add-btn" onclick="openAddTask()">
+        <i class="ti ti-plus"></i>新增任務
+      </button>
+    </div>
+
+    <!-- FOCUS TAB -->
+    <div class="section" id="tab-focus">
+      <div class="focus-wrap">
+        <div class="mode-pills">
+          <div class="pill active" onclick="setMode('work',this)">專注 25min</div>
+          <div class="pill" onclick="setMode('short',this)">短休息 5min</div>
+          <div class="pill" onclick="setMode('long',this)">長休息 15min</div>
+        </div>
+        <div class="ring-wrap">
+          <svg width="220" height="220" viewBox="0 0 220 220" aria-hidden="true">
+            <circle class="ring-bg" cx="110" cy="110" r="96"/>
+            <circle class="ring-fill" id="ring" cx="110" cy="110" r="96"
+              stroke-dasharray="603" stroke-dashoffset="0"/>
+          </svg>
+          <div class="ring-text">
+            <div class="ring-time" id="timer-disp">25:00</div>
+            <div class="ring-mode" id="timer-mode">專注時間</div>
+          </div>
+        </div>
+        <div class="pom-dots" id="pom-dots">
+          <div class="pdot done"></div><div class="pdot done"></div>
+          <div class="pdot"></div><div class="pdot"></div>
+        </div>
+        <div class="focus-btns">
+          <button class="fb" onclick="resetTimer()" aria-label="重置"><i class="ti ti-refresh"></i></button>
+          <button class="fb main" id="play-btn" onclick="toggleTimer()" aria-label="開始/暫停">
+            <i class="ti ti-player-play" id="play-icon"></i>
+          </button>
+          <button class="fb" onclick="skipTimer()" aria-label="跳過"><i class="ti ti-player-skip-forward"></i></button>
+        </div>
+        <div class="focus-task" onclick="pickTask()">
+          <i class="ti ti-target" style="font-size:22px;color:var(--blue)"></i>
+          <div>
+            <div style="font-size:12px;color:var(--text2)">目前專注任務</div>
+            <div style="font-size:14px;font-weight:500" id="focus-task">點此從待辦選取任務</div>
+          </div>
+        </div>
+        <div class="focus-stats">
+          <div class="fstat">
+            <div class="fstat-val" id="s-today">0</div>
+            <div class="fstat-lbl">今日番茄鐘</div>
+          </div>
+          <div class="fstat">
+            <div class="fstat-val" id="s-min">0</div>
+            <div class="fstat-lbl">今日專注分鐘</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HABIT TAB -->
+    <div class="section" id="tab-habit">
+      <div class="habit-hdr">
+        <span style="font-size:16px;font-weight:600">習慣追蹤</span>
+        <button style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:13px;display:flex;align-items:center;gap:4px" onclick="openAddHabit()">
+          <i class="ti ti-plus"></i>新增習慣
+        </button>
+      </div>
+      <div class="habit-week" id="habit-week"></div>
+      <div class="habit-cards" id="habit-cards"></div>
+    </div>
+
+  </div><!-- .content -->
+</div><!-- .app -->
+
+<!-- ADD TASK MODAL -->
+<div class="overlay" id="task-modal" onclick="closeModal('task-modal',event)">
+  <div class="modal">
+    <h3>新增任務</h3>
+    <input type="text" id="task-input" placeholder="任務名稱" maxlength="50"/>
+    <select id="task-tag">
+      <option value="work">工作</option>
+      <option value="life">生活</option>
+      <option value="health">健身</option>
+    </select>
+    <div class="modal-btns">
+      <button class="mbtn cancel" onclick="closeModal('task-modal')">取消</button>
+      <button class="mbtn confirm" onclick="saveTask()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD HABIT MODAL -->
+<div class="overlay" id="habit-modal" onclick="closeModal('habit-modal',event)">
+  <div class="modal">
+    <h3>新增習慣</h3>
+    <input type="text" id="habit-input" placeholder="習慣名稱（例：每天閱讀）" maxlength="20"/>
+    <select id="habit-emoji">
+      <option value="⭐">⭐ 一般</option>
+      <option value="🌅">🌅 早起</option>
+      <option value="💧">💧 喝水</option>
+      <option value="📖">📖 閱讀</option>
+      <option value="🏃">🏃 運動</option>
+      <option value="🧘">🧘 冥想</option>
+      <option value="🍎">🍎 飲食</option>
+      <option value="💊">💊 用藥</option>
+    </select>
+    <div class="modal-btns">
+      <button class="mbtn cancel" onclick="closeModal('habit-modal')">取消</button>
+      <button class="mbtn confirm" onclick="saveHabit()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────
+const MONTHS = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+const DAYS   = ['日','一','二','三','四','五','六'];
+const CIRC   = 2*Math.PI*96;
+const MODES  = {work:{sec:25*60,label:'專注時間'},short:{sec:5*60,label:'短休息'},long:{sec:15*60,label:'長休息'}};
+
+const today  = new Date();
+let calDate  = new Date(today.getFullYear(), today.getMonth(), 1);
+let selDay   = today.getDate();
+
+function loadData(key, def){ try{ return JSON.parse(localStorage.getItem(key)||'null')||def; }catch(e){ return def; } }
+function saveData(key,val){ try{ localStorage.setItem(key,JSON.stringify(val)); }catch(e){} }
+
+let tasks  = loadData('df_tasks',  {});
+let habits = loadData('df_habits', [
+  {id:1,name:'早起 6:30',icon:'🌅',color:'#FEF3C7',streak:0,total:0,checks:{}},
+  {id:2,name:'喝水 8 杯',icon:'💧',color:'#DBEAFE',streak:0,total:0,checks:{}},
+  {id:3,name:'慢跑健走', icon:'🏃',color:'#D1FAE5',streak:0,total:0,checks:{}},
+]);
+let pomCount = loadData('df_pom_'+dateKey(today), 0);
+
+function dateKey(d){ return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`; }
+function todayKey(){ return dateKey(today); }
+function selKey(){ return `${calDate.getFullYear()}-${calDate.getMonth()+1}-${selDay}`; }
+
+// ── TABS ──────────────────────────────────────────────
+function switchTab(id, el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+  const T={cal:'每日任務 DailyFlow',focus:'專注計時',habit:'習慣打卡'};
+  const S={cal:pendingSummary(),focus:'保持專注，調整節奏',habit:'規律生活，達成目標'};
+  document.getElementById('hdr-title').textContent=T[id];
+  document.getElementById('hdr-sub').textContent=S[id];
+}
+function pendingSummary(){
+  const k=todayKey(); const t=tasks[k]||[];
+  const n=t.filter(x=>!x.done).length;
+  return n?`今天還有 ${n} 件待辦事項`:'今天的任務都完成了 🎉';
+}
+
+// ── CALENDAR ──────────────────────────────────────────
+function renderCal(){
+  const y=calDate.getFullYear(), m=calDate.getMonth();
+  document.getElementById('cal-lbl').textContent=MONTHS[m]+' '+y;
+  const first=new Date(y,m,1).getDay();
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const g=document.getElementById('cal-grid');
+  g.innerHTML=DAYS.map(d=>`<div class="dow">${d}</div>`).join('');
+  for(let i=0;i<first;i++) g.insertAdjacentHTML('beforeend','<div></div>');
+  for(let d=1;d<=daysInMonth;d++){
+    const isT=y===today.getFullYear()&&m===today.getMonth()&&d===today.getDate();
+    const isSel=d===selDay;
+    const k=`${y}-${m+1}-${d}`;
+    const hasTasks=(tasks[k]||[]).length>0;
+    let cls='cal-day'; if(isT) cls+=' today'; else if(isSel) cls+=' selected';
+    g.insertAdjacentHTML('beforeend',
+      `<div class="${cls}" onclick="selectDay(${d})">
+        <div class="day-num">${d}</div>
+        <div class="day-dot${hasTasks?'':' hidden'}"></div>
+      </div>`);
+  }
+}
+function selectDay(d){ selDay=d; renderCal(); renderTasks(); }
+function changeMonth(dir){
+  calDate=new Date(calDate.getFullYear(),calDate.getMonth()+dir,1);
+  renderCal(); renderTasks();
+}
+function renderTasks(){
+  const k=selKey(); const list=tasks[k]||[];
+  const isToday=k===todayKey();
+  document.getElementById('task-lbl').textContent=isToday?'今天的任務':`${selDay} 日的任務`;
+  const c=document.getElementById('task-list');
+  if(!list.length){
+    c.innerHTML=`<div class="empty-state"><i class="ti ti-clipboard-list"></i>這天沒有任務<br><span style="font-size:13px">點下方新增</span></div>`;
+    return;
+  }
+  c.innerHTML=list.map(t=>`
+    <div class="task-item" onclick="toggleTask('${k}',${t.id})">
+      <div class="chk${t.done?' done':''}"></div>
+      <div class="task-body">
+        <div class="task-name${t.done?' done':''}">${t.text}</div>
+      </div>
+      <span class="tag tag-${t.tag}">${{work:'工作',life:'生活',health:'健身'}[t.tag]}</span>
+    </div>`).join('');
+}
+function toggleTask(k,id){
+  const t=(tasks[k]||[]).find(x=>x.id===id);
+  if(t){ t.done=!t.done; saveData('df_tasks',tasks); renderTasks(); renderCal();
+    if(t.done) showToast('任務完成 ✓'); }
+}
+function openAddTask(){
+  document.getElementById('task-input').value='';
+  document.getElementById('task-modal').classList.add('show');
+  setTimeout(()=>document.getElementById('task-input').focus(),300);
+}
+function saveTask(){
+  const text=document.getElementById('task-input').value.trim();
+  if(!text){showToast('請輸入任務名稱');return;}
+  const tag=document.getElementById('task-tag').value;
+  const k=selKey();
+  if(!tasks[k]) tasks[k]=[];
+  tasks[k].push({id:Date.now(),text,tag,done:false});
+  saveData('df_tasks',tasks);
+  closeModal('task-modal'); renderCal(); renderTasks();
+  showToast('已新增任務');
+}
+
+// ── TIMER ────────────────────────────────────────────
+let curMode='work', totalSec=25*60, remSec=25*60, running=false, tInt=null;
+function setMode(m,el){
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  curMode=m; totalSec=MODES[m].sec; remSec=totalSec;
+  if(running){ clearInterval(tInt); running=false; }
+  document.getElementById('play-icon').className='ti ti-player-play';
+  document.getElementById('timer-mode').textContent=MODES[m].label;
+  updateRing();
+}
+function updateRing(){
+  const m=String(Math.floor(remSec/60)).padStart(2,'0');
+  const s=String(remSec%60).padStart(2,'0');
+  document.getElementById('timer-disp').textContent=m+':'+s;
+  const offset=CIRC*(1-remSec/totalSec);
+  document.getElementById('ring').style.strokeDashoffset=offset;
+}
+function toggleTimer(){
+  running=!running;
+  document.getElementById('play-icon').className=running?'ti ti-player-pause':'ti ti-player-play';
+  if(running){
+    tInt=setInterval(()=>{
+      if(remSec>0){ remSec--; updateRing(); }
+      else{
+        clearInterval(tInt); running=false;
+        document.getElementById('play-icon').className='ti ti-player-play';
+        if(curMode==='work'){
+          pomCount++; saveData('df_pom_'+todayKey(),pomCount);
+          document.getElementById('s-today').textContent=pomCount;
+          document.getElementById('s-min').textContent=pomCount*25;
+        }
+        if(Notification.permission==='granted'){
+          new Notification('DailyFlow', {body:curMode==='work'?'番茄鐘完成！休息一下 🎉':'休息結束，繼續專注 💪',icon:'icons/icon-192x192.png'});
+        }
+        showToast(curMode==='work'?'番茄鐘完成 🎉':'休息結束，繼續加油！');
+        remSec=totalSec; updateRing();
+      }
+    },1000);
+  } else clearInterval(tInt);
+}
+function resetTimer(){ running=false; clearInterval(tInt); remSec=totalSec;
+  document.getElementById('play-icon').className='ti ti-player-play'; updateRing(); }
+function skipTimer(){ resetTimer(); }
+function pickTask(){
+  const all=Object.values(tasks).flat().filter(t=>!t.done);
+  if(!all.length){ showToast('沒有待完成的任務'); return; }
+  const pick=all[Math.floor(Math.random()*all.length)];
+  document.getElementById('focus-task').textContent=pick.text;
+  showToast('已選取任務');
+}
+
+// ── HABITS ──────────────────────────────────────────
+function renderHabitWeek(){
+  const row=document.getElementById('habit-week');
+  const d=new Date(today);
+  const start=new Date(d); start.setDate(d.getDate()-d.getDay());
+  row.innerHTML='';
+  for(let i=0;i<7;i++){
+    const dd=new Date(start); dd.setDate(start.getDate()+i);
+    const isT=dateKey(dd)===todayKey();
+    row.insertAdjacentHTML('beforeend',
+      `<div class="wday"><div class="wd-lbl">${DAYS[i]}</div><div class="wd-n${isT?' today':''}">${dd.getDate()}</div></div>`);
+  }
+}
+function renderHabits(){
+  const cards=document.getElementById('habit-cards');
+  if(!habits.length){
+    cards.innerHTML=`<div class="empty-state"><i class="ti ti-refresh"></i>還沒有習慣<br><span style="font-size:13px">點右上角新增</span></div>`;
+    return;
+  }
+  const wStart=new Date(today); wStart.setDate(today.getDate()-today.getDay());
+  cards.innerHTML=habits.map(h=>{
+    const weekKeys=Array.from({length:7},(_,i)=>{const d=new Date(wStart);d.setDate(wStart.getDate()+i);return dateKey(d);});
+    const done=weekKeys.filter(k=>h.checks[k]).length;
+    const pct=Math.round(done/7*100);
+    const tKey=todayKey();
+    const wcs=weekKeys.map((k,i)=>`<div class="wc${h.checks[k]?' done':''}${k===tKey?' today-marker':''}" onclick="toggleHabitDay(${h.id},'${k}')">${h.checks[k]?'✓':''}</div>`).join('');
+    return `<div class="hcard">
+      <div class="hcard-top">
+        <div class="hicon" style="background:${h.color}">${h.icon}</div>
+        <div class="hinfo">
+          <div class="hname">${h.name}</div>
+          <div class="hstreak"><i class="ti ti-flame" style="font-size:13px;color:#EF4444"></i> 連續 ${h.streak} 天 · 累計 ${h.total} 天</div>
+        </div>
+        <button class="hchk-btn${h.checks[tKey]?' on':''}" onclick="toggleHabitDay(${h.id},'${tKey}')" aria-label="今日打卡">${h.checks[tKey]?'✓':''}</button>
+      </div>
+      <div class="week-checks">${wcs}</div>
+      <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:6px">
+        <span style="font-size:12px;color:var(--text2)">本週 ${pct}%</span>
+      </div>
+      <div class="pbar"><div class="pfill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+function toggleHabitDay(id, key){
+  const h=habits.find(x=>x.id===id); if(!h) return;
+  const was=!!h.checks[key];
+  h.checks[key]=was?0:1;
+  if(!was){ h.total++; if(key===todayKey()) h.streak++; showToast(h.name+' 打卡成功 🎯'); }
+  else { h.total=Math.max(0,h.total-1); if(key===todayKey()) h.streak=Math.max(0,h.streak-1); }
+  saveData('df_habits',habits); renderHabits();
+}
+function openAddHabit(){
+  document.getElementById('habit-input').value='';
+  document.getElementById('habit-modal').classList.add('show');
+  setTimeout(()=>document.getElementById('habit-input').focus(),300);
+}
+function saveHabit(){
+  const name=document.getElementById('habit-input').value.trim();
+  if(!name){showToast('請輸入習慣名稱');return;}
+  const icon=document.getElementById('habit-emoji').value;
+  const colors=['#FEF3C7','#DBEAFE','#D1FAE5','#FCE7F3','#F3E8FF'];
+  habits.push({id:Date.now(),name,icon,color:colors[habits.length%colors.length],streak:0,total:0,checks:{}});
+  saveData('df_habits',habits);
+  closeModal('habit-modal'); renderHabits();
+  showToast('習慣已新增');
+}
+
+// ── MODAL / TOAST ────────────────────────────────────
+function closeModal(id, e){
+  if(e && e.target!==document.getElementById(id)) return;
+  document.getElementById(id).classList.remove('show');
+}
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2200);
+}
+function showNotifPrompt(){
+  if(!('Notification' in window)){showToast('此瀏覽器不支援通知');return;}
+  Notification.requestPermission().then(p=>{
+    showToast(p==='granted'?'已開啟提醒通知 🔔':'提醒通知未開啟');
+  });
+}
+
+// ── URL PARAMS ─────────────────────────────────────
+const params=new URLSearchParams(location.search);
+if(params.get('tab')==='focus'){
+  setTimeout(()=>{ const t=document.querySelectorAll('.tab')[1]; if(t) switchTab('focus',t); },100);
+}
+if(params.get('action')==='add-task'){
+  setTimeout(openAddTask,300);
+}
+
+// ── ENTER KEY ────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    if(document.getElementById('task-modal').classList.contains('show')) saveTask();
+    if(document.getElementById('habit-modal').classList.contains('show')) saveHabit();
+  }
+  if(e.key==='Escape'){
+    document.querySelectorAll('.overlay.show').forEach(o=>o.classList.remove('show'));
+  }
+});
+
+// ── SW REGISTER ──────────────────────────────────────
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').then(()=>{
+    console.log('[DailyFlow] Service Worker registered');
+  }).catch(console.error);
+}
+
+// ── INIT ─────────────────────────────────────────────
+renderCal(); renderTasks();
+document.getElementById('s-today').textContent=pomCount;
+document.getElementById('s-min').textContent=pomCount*25;
+updateRing();
+renderHabitWeek(); renderHabits();
+document.getElementById('hdr-sub').textContent=pendingSummary();
+</script>
+</body>
+</html>
