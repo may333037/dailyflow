@@ -2,8 +2,7 @@
   "name": "每日任務 DailyFlow",
   "short_name": "DailyFlow",
   "description": "日曆任務、番茄鐘專注計時、習慣打卡三合一 App",
-  "start_url": "/dailyflow/index.html",
-  "scope": "/dailyflow/",
+  "start_url": "/index.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#2563EB",
@@ -26,14 +25,14 @@
       "name": "新增任務",
       "short_name": "新增",
       "description": "快速新增一筆任務",
-      "url": "/dailyflow/index.html?action=add-task",
+      "url": "/index.html?action=add-task",
       "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
     },
     {
       "name": "開始專注",
       "short_name": "專注",
       "description": "啟動番茄鐘",
-      "url": "/dailyflow/index.html?tab=focus",
+      "url": "/index.html?tab=focus",
       "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
     }
   ]
