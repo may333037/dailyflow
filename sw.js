@@ -1,15 +1,7 @@
-const CACHE = 'dailyflow-v1';
-const ASSETS = [
-  '/index.html',
-  '/manifest.json',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
-];
+const CACHE = 'dailyflow-v2';
 
 self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())
-  );
+  e.waitUntil(self.skipWaiting());
 });
 
 self.addEventListener('activate', e => {
@@ -22,26 +14,27 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request).catch(() => caches.match('/index.html')))
+    caches.match(e.request).then(cached => {
+      if (cached) return cached;
+      return fetch(e.request).then(res => {
+        if (res && res.status === 200 && e.request.method === 'GET') {
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
+        }
+        return res;
+      }).catch(() => caches.match('/dailyflow/index.html'));
+    })
   );
 });
 
-// Background sync for habit/task data
-self.addEventListener('sync', e => {
-  if (e.tag === 'sync-data') {
-    console.log('[SW] Background sync triggered');
-  }
-});
-
-// Push notification support
 self.addEventListener('push', e => {
-  const data = e.data ? e.data.json() : { title: '每日任務', body: '記得打卡今天的習慣！' };
+  const data = e.data ? e.data.json() : {title:'每日任務',body:'記得打卡今天的習慣！'};
   e.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
-      icon: '/icons/icon-192x192.png',
-      badge: '/icons/icon-72x72.png',
-      vibrate: [200, 100, 200],
+      icon: '/dailyflow/icons/icon-192x192.png',
+      badge: '/dailyflow/icons/icon-72x72.png',
+      vibrate: [200,100,200],
       tag: 'dailyflow-reminder'
     })
   );
@@ -49,5 +42,5 @@ self.addEventListener('push', e => {
 
 self.addEventListener('notificationclick', e => {
   e.notification.close();
-  e.waitUntil(clients.openWindow('/index.html'));
+  e.waitUntil(clients.openWindow('/dailyflow/index.html'));
 });
