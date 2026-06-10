@@ -14,21 +14,16 @@
 <title>每日任務 DailyFlow</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css"/>
 <style>
-:root {
-  --blue:#2563EB; --blue-dk:#1D4ED8; --blue-lt:#DBEAFE;
-  --green-lt:#D1FAE5; --green-dk:#065F46;
-  --red:#EF4444; --amber:#F59E0B;
-  --bg:#F8FAFC; --surface:#FFFFFF; --border:#E2E8F0;
-  --text:#1E293B; --text2:#64748B; --text3:#94A3B8;
-  --radius:12px; --radius-sm:8px;
-  --shadow:0 1px 3px rgba(0,0,0,.08);
+:root{
+  --blue:#2563EB;--blue-dk:#1D4ED8;--blue-lt:#DBEAFE;
+  --green-lt:#D1FAE5;--green-dk:#065F46;
+  --red:#EF4444;--amber:#F59E0B;
+  --bg:#F8FAFC;--surface:#FFFFFF;--border:#E2E8F0;
+  --text:#1E293B;--text2:#64748B;--text3:#94A3B8;
+  --radius:12px;--radius-sm:8px;
 }
 @media(prefers-color-scheme:dark){
-  :root{
-    --bg:#0F172A; --surface:#1E293B; --border:#334155;
-    --text:#F1F5F9; --text2:#94A3B8; --text3:#64748B;
-    --blue-lt:#1E3A8A; --green-lt:#064E3B; --green-dk:#6EE7B7;
-  }
+  :root{--bg:#0F172A;--surface:#1E293B;--border:#334155;--text:#F1F5F9;--text2:#94A3B8;--text3:#64748B;--blue-lt:#1E3A8A;--green-lt:#064E3B;--green-dk:#6EE7B7;}
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden}
@@ -45,8 +40,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tab i{font-size:22px}
 .tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:500}
 .content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
-.section{display:none}
-.section.active{display:block}
+.section{display:none}.section.active{display:block}
+
+/* CALENDAR */
 .cal-nav{display:flex;align-items:center;justify-content:space-between;padding:14px 20px 8px}
 .cal-month{font-size:16px;font-weight:600}
 .nav-btn{background:none;border:none;cursor:pointer;color:var(--text2);padding:6px 10px;border-radius:var(--radius-sm);font-size:16px}
@@ -60,24 +56,33 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .cal-day.selected:not(.today) .day-num{background:var(--blue-lt);color:var(--blue);font-weight:600}
 .day-dot{width:4px;height:4px;border-radius:50%;background:var(--red);margin-top:2px}
 .day-dot.hidden{visibility:hidden}
+
+/* TASKS */
 .tasks-wrap{padding:14px 20px}
 .section-label{font-size:12px;color:var(--text2);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
-.task-item{display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;cursor:pointer;transition:.15s}
-.task-item:active{opacity:.7}
-.chk{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.2s}
+.task-item{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;transition:.15s}
+.task-item:active{opacity:.8}
+.chk{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s}
 .chk.done{background:var(--blue);border-color:var(--blue)}
 .chk.done::after{content:'';display:block;width:9px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translateY(-1px)}
-.task-body{flex:1;min-width:0}
+.task-body{flex:1;min-width:0;cursor:pointer}
 .task-name{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .task-name.done{text-decoration:line-through;color:var(--text2)}
 .tag{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500;white-space:nowrap}
 .tag-work{background:#DBEAFE;color:#1D4ED8}
 .tag-life{background:var(--green-lt);color:var(--green-dk)}
 .tag-health{background:#FCE7F3;color:#9D174D}
+.task-actions{display:flex;gap:4px;flex-shrink:0}
+.task-action-btn{background:none;border:none;cursor:pointer;color:var(--text3);padding:4px;border-radius:6px;font-size:16px;line-height:1;transition:.15s}
+.task-action-btn:hover{color:var(--text2);background:var(--bg)}
+.task-action-btn.del:hover{color:var(--red)}
+
 .empty-state{text-align:center;padding:32px 20px;color:var(--text3)}
 .empty-state i{font-size:40px;display:block;margin-bottom:8px}
 .add-btn{display:flex;align-items:center;gap:8px;width:calc(100% - 40px);margin:0 20px 20px;padding:12px 16px;border:1.5px dashed var(--border);border-radius:var(--radius);background:none;color:var(--text2);cursor:pointer;font-size:14px;transition:.2s}
 .add-btn:active{background:var(--bg)}
+
+/* FOCUS */
 .focus-wrap{padding:20px 20px 32px;display:flex;flex-direction:column;align-items:center;gap:20px}
 .mode-pills{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
 .pill{padding:8px 18px;border-radius:20px;font-size:13px;cursor:pointer;border:1px solid var(--border);color:var(--text2);background:var(--surface);transition:.2s;user-select:none}
@@ -98,11 +103,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .fb.main{width:66px;height:66px;background:var(--blue);border-color:var(--blue);color:#fff;font-size:28px}
 .fb.main:active{background:var(--blue-dk)}
 .focus-task{width:100%;background:var(--bg);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;border:1px solid var(--border)}
-.focus-task:active{opacity:.7}
 .focus-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%}
 .fstat{background:var(--bg);border-radius:var(--radius);padding:14px;text-align:center;border:1px solid var(--border)}
 .fstat-val{font-size:26px;font-weight:500}
 .fstat-lbl{font-size:12px;color:var(--text2);margin-top:2px}
+
+/* HABIT */
 .habit-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 20px 4px}
 .habit-week{display:flex;gap:6px;padding:8px 20px 12px;overflow-x:auto}
 .wday{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:38px}
@@ -116,6 +122,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .hinfo{flex:1}
 .hname{font-size:14px;font-weight:600}
 .hstreak{font-size:12px;color:var(--text2);margin-top:2px}
+.hcard-actions{display:flex;gap:4px}
+.hcard-btn{background:none;border:none;cursor:pointer;color:var(--text3);padding:5px;border-radius:6px;font-size:17px;line-height:1;transition:.15s}
+.hcard-btn:hover{color:var(--text2);background:var(--bg)}
+.hcard-btn.del:hover{color:var(--red)}
 .hchk-btn{width:34px;height:34px;border-radius:50%;border:2px solid var(--border);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:transparent;transition:.2s;flex-shrink:0}
 .hchk-btn.on{background:var(--blue);border-color:var(--blue);color:#fff}
 .week-checks{display:flex;gap:5px;margin-bottom:8px}
@@ -124,6 +134,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .wc.today-marker{border-width:2px;border-color:var(--blue)}
 .pbar{height:4px;background:var(--bg);border-radius:2px;overflow:hidden}
 .pfill{height:100%;background:var(--blue);border-radius:2px;transition:width .4s}
+
+/* MODAL */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;z-index:100;opacity:0;pointer-events:none;transition:.25s}
 .overlay.show{opacity:1;pointer-events:all}
 .modal{background:var(--surface);border-radius:20px 20px 0 0;padding:24px 20px calc(24px + env(safe-area-inset-bottom,0px));width:100%;transform:translateY(40px);transition:.25s}
@@ -135,10 +147,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .mbtn{flex:1;padding:13px;border-radius:var(--radius-sm);border:none;cursor:pointer;font-size:15px;font-weight:500}
 .mbtn.cancel{background:var(--bg);color:var(--text2)}
 .mbtn.confirm{background:var(--blue);color:#fff}
-.toast{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%) translateY(20px);background:#1E293B;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;z-index:200}
+.mbtn.danger{background:var(--red);color:#fff}
+
+/* CONFIRM DIALOG */
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:.2s;padding:20px}
+.confirm-overlay.show{opacity:1;pointer-events:all}
+.confirm-box{background:var(--surface);border-radius:16px;padding:24px 20px;width:100%;max-width:320px;text-align:center}
+.confirm-box h4{font-size:16px;font-weight:600;margin-bottom:8px}
+.confirm-box p{font-size:14px;color:var(--text2);margin-bottom:20px}
+.confirm-btns{display:flex;gap:10px}
+
+/* TOAST */
+.toast{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%) translateY(20px);background:#1E293B;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;z-index:300}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.sync-indicator{position:fixed;top:12px;right:12px;width:8px;height:8px;border-radius:50%;background:#22C55E;z-index:300;opacity:0;transition:.3s}
-.sync-indicator.show{opacity:1}
+.sync-dot{position:fixed;top:12px;right:12px;width:8px;height:8px;border-radius:50%;background:#22C55E;z-index:300;opacity:0;transition:.3s}
+.sync-dot.show{opacity:1}
 </style>
 </head>
 <body>
@@ -161,6 +184,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="tab" onclick="switchTab('habit',this)"><i class="ti ti-checks"></i>習慣</div>
   </div>
   <div class="content">
+
+    <!-- CALENDAR -->
     <div class="section active" id="tab-cal">
       <div class="cal-nav">
         <button class="nav-btn" onclick="changeMonth(-1)"><i class="ti ti-chevron-left"></i></button>
@@ -174,6 +199,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </div>
       <button class="add-btn" onclick="openAddTask()"><i class="ti ti-plus"></i>新增任務</button>
     </div>
+
+    <!-- FOCUS -->
     <div class="section" id="tab-focus">
       <div class="focus-wrap">
         <div class="mode-pills">
@@ -196,7 +223,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         </div>
         <div class="focus-btns">
           <button class="fb" onclick="resetTimer()"><i class="ti ti-refresh"></i></button>
-          <button class="fb main" id="play-btn" onclick="toggleTimer()"><i class="ti ti-player-play" id="play-icon"></i></button>
+          <button class="fb main" onclick="toggleTimer()"><i class="ti ti-player-play" id="play-icon"></i></button>
           <button class="fb" onclick="skipTimer()"><i class="ti ti-player-skip-forward"></i></button>
         </div>
         <div class="focus-task" onclick="pickTask()">
@@ -212,6 +239,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         </div>
       </div>
     </div>
+
+    <!-- HABIT -->
     <div class="section" id="tab-habit">
       <div class="habit-hdr">
         <span style="font-size:16px;font-weight:600">習慣追蹤</span>
@@ -220,12 +249,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="habit-week" id="habit-week"></div>
       <div class="habit-cards" id="habit-cards"></div>
     </div>
+
   </div>
 </div>
 
+<!-- 新增/編輯任務 -->
 <div class="overlay" id="task-modal" onclick="closeModal('task-modal',event)">
   <div class="modal">
-    <h3>新增任務</h3>
+    <h3 id="task-modal-title">新增任務</h3>
     <input type="text" id="task-input" placeholder="任務名稱" maxlength="50"/>
     <select id="task-tag">
       <option value="work">工作</option>
@@ -234,14 +265,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </select>
     <div class="modal-btns">
       <button class="mbtn cancel" onclick="closeModal('task-modal')">取消</button>
-      <button class="mbtn confirm" onclick="saveTask()">儲存</button>
+      <button class="mbtn confirm" id="task-save-btn" onclick="saveTask()">儲存</button>
     </div>
   </div>
 </div>
 
+<!-- 新增/編輯習慣 -->
 <div class="overlay" id="habit-modal" onclick="closeModal('habit-modal',event)">
   <div class="modal">
-    <h3>新增習慣</h3>
+    <h3 id="habit-modal-title">新增習慣</h3>
     <input type="text" id="habit-input" placeholder="習慣名稱（例：每天閱讀）" maxlength="20"/>
     <select id="habit-emoji">
       <option value="⭐">⭐ 一般</option>
@@ -255,24 +287,37 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </select>
     <div class="modal-btns">
       <button class="mbtn cancel" onclick="closeModal('habit-modal')">取消</button>
-      <button class="mbtn confirm" onclick="saveHabit()">儲存</button>
+      <button class="mbtn confirm" id="habit-save-btn" onclick="saveHabit()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 刪除確認 -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <h4 id="confirm-title">確認刪除</h4>
+    <p id="confirm-msg">確定要刪除嗎？</p>
+    <div class="confirm-btns">
+      <button class="mbtn cancel" style="flex:1" onclick="closeConfirm()">取消</button>
+      <button class="mbtn danger" style="flex:1" id="confirm-ok-btn">刪除</button>
     </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
-<div class="sync-indicator" id="sync-dot"></div>
+<div class="sync-dot" id="sync-dot"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SB_URL = 'https://dgnhdbbppxcqfsizefqz.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRnbmhkYmJwcHhjcWZzaXplZnF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMDAxMzYsImV4cCI6MjA5NjY3NjEzNn0.e_PoZZifs_tHe-OAHj-6KCAZt2H5zstOMvBpvEe4G2A';
-const sb = supabase.createClient(SB_URL, SB_KEY);
+const SB_URL='https://dgnhdbbppxcqfsizefqz.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRnbmhkYmJwcHhjcWZzaXplZnF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMDAxMzYsImV4cCI6MjA5NjY3NjEzNn0.e_PoZZifs_tHe-OAHj-6KCAZt2H5zstOMvBpvEe4G2A';
+const sb=supabase.createClient(SB_URL,SB_KEY);
 
 const MONTHS=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
 const DAYS=['日','一','二','三','四','五','六'];
 const CIRC=2*Math.PI*96;
 const MODES={work:{sec:25*60,label:'專注時間'},short:{sec:5*60,label:'短休息'},long:{sec:15*60,label:'長休息'}};
+const TAG_LABEL={work:'工作',life:'生活',health:'健身'};
 
 const today=new Date();
 let calDate=new Date(today.getFullYear(),today.getMonth(),1);
@@ -288,13 +333,16 @@ let tasks=loadData('df_tasks',{});
 let habits=loadData('df_habits',[]);
 let pomCount=loadData('df_pom_'+dateKey(today),0);
 
-// ── SUPABASE SYNC ────────────────────────────────────
+// 編輯狀態
+let editingTaskId=null, editingTaskKey=null;
+let editingHabitId=null;
+
+// ── SUPABASE SYNC ─────────────────────────────────────
 async function syncFromCloud(){
   showToast('同步中... ☁️',5000);
   try{
-    // 任務
     const {data:tData,error:tErr}=await sb.from('tasks').select('*');
-    if(!tErr && tData){
+    if(!tErr&&tData){
       tasks={};
       tData.forEach(t=>{
         if(!tasks[t.date_key]) tasks[t.date_key]=[];
@@ -302,49 +350,33 @@ async function syncFromCloud(){
       });
       saveData('df_tasks',tasks);
     }
-    // 習慣
     const {data:hData,error:hErr}=await sb.from('habits').select('*');
-    if(!hErr && hData && hData.length){
+    if(!hErr&&hData&&hData.length){
       habits=hData.map(h=>({id:h.id,name:h.name,icon:h.icon,color:h.color,streak:h.streak,total:h.total,checks:h.checks||{}}));
       saveData('df_habits',habits);
-    } else if(!hErr && (!hData||!hData.length) && !habits.length){
+    } else if(!hErr&&(!hData||!hData.length)&&!habits.length){
       await addDefaultHabits();
     }
-    // 專注統計
     const {data:fData}=await sb.from('focus_stats').select('*').eq('date_key',todayKey()).maybeSingle();
     if(fData){pomCount=fData.pom_count;saveData('df_pom_'+todayKey(),pomCount);}
-
     document.getElementById('s-today').textContent=pomCount;
     document.getElementById('s-min').textContent=pomCount*25;
     renderCal();renderTasks();renderHabits();
     document.getElementById('hdr-sub').textContent=pendingSummary();
-    showSyncDot();
-    showToast('同步完成 ✓');
-  }catch(e){
-    showToast('離線模式，資料存本地');
-  }
+    showSyncDot();showToast('同步完成 ✓');
+  }catch(e){showToast('離線模式，資料存本地');}
 }
-
 async function addDefaultHabits(){
-  const defaults=[
-    {name:'早起 6:30',icon:'🌅',color:'#FEF3C7'},
-    {name:'喝水 8 杯',icon:'💧',color:'#DBEAFE'},
-    {name:'慢跑健走', icon:'🏃',color:'#D1FAE5'},
-  ];
+  const defaults=[{name:'早起 6:30',icon:'🌅',color:'#FEF3C7'},{name:'喝水 8 杯',icon:'💧',color:'#DBEAFE'},{name:'慢跑健走',icon:'🏃',color:'#D1FAE5'}];
   for(const h of defaults){
     const {data}=await sb.from('habits').insert({...h,streak:0,total:0,checks:{}}).select().single();
     if(data) habits.push({...data,checks:data.checks||{}});
   }
   saveData('df_habits',habits);
 }
+function showSyncDot(){const d=document.getElementById('sync-dot');d.classList.add('show');setTimeout(()=>d.classList.remove('show'),2000);}
 
-function showSyncDot(){
-  const d=document.getElementById('sync-dot');
-  d.classList.add('show');
-  setTimeout(()=>d.classList.remove('show'),2000);
-}
-
-// ── TABS ─────────────────────────────────────────────
+// ── TABS ──────────────────────────────────────────────
 function switchTab(id,el){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
@@ -361,7 +393,7 @@ function pendingSummary(){
   return n?`今天還有 ${n} 件待辦事項`:'今天的任務都完成了 🎉';
 }
 
-// ── CALENDAR ─────────────────────────────────────────
+// ── CALENDAR ──────────────────────────────────────────
 function renderCal(){
   const y=calDate.getFullYear(),m=calDate.getMonth();
   document.getElementById('cal-lbl').textContent=MONTHS[m]+' '+y;
@@ -385,54 +417,99 @@ function renderCal(){
 }
 function selectDay(d){selDay=d;renderCal();renderTasks();}
 function changeMonth(dir){calDate=new Date(calDate.getFullYear(),calDate.getMonth()+dir,1);renderCal();renderTasks();}
+
+// ── TASKS ─────────────────────────────────────────────
 function renderTasks(){
   const k=selKey();const list=tasks[k]||[];
   document.getElementById('task-lbl').textContent=k===todayKey()?'今天的任務':`${selDay} 日的任務`;
   const c=document.getElementById('task-list');
-  if(!list.length){c.innerHTML=`<div class="empty-state"><i class="ti ti-clipboard-list"></i>這天沒有任務<br><span style="font-size:13px">點下方新增</span></div>`;return;}
+  if(!list.length){
+    c.innerHTML=`<div class="empty-state"><i class="ti ti-clipboard-list"></i>這天沒有任務<br><span style="font-size:13px">點下方新增</span></div>`;
+    return;
+  }
   c.innerHTML=list.map(t=>`
-    <div class="task-item" onclick="toggleTask('${k}',${t.id})">
-      <div class="chk${t.done?' done':''}"></div>
-      <div class="task-body"><div class="task-name${t.done?' done':''}">${t.text}</div></div>
-      <span class="tag tag-${t.tag}">${{work:'工作',life:'生活',health:'健身'}[t.tag]}</span>
+    <div class="task-item">
+      <div class="chk${t.done?' done':''}" onclick="toggleTask('${k}',${t.id})"></div>
+      <div class="task-body" onclick="toggleTask('${k}',${t.id})">
+        <div class="task-name${t.done?' done':''}">${t.text}</div>
+      </div>
+      <span class="tag tag-${t.tag}">${TAG_LABEL[t.tag]}</span>
+      <div class="task-actions">
+        <button class="task-action-btn" onclick="openEditTask('${k}',${t.id})" aria-label="編輯"><i class="ti ti-pencil"></i></button>
+        <button class="task-action-btn del" onclick="confirmDeleteTask('${k}',${t.id},'${t.text}')" aria-label="刪除"><i class="ti ti-trash"></i></button>
+      </div>
     </div>`).join('');
 }
+
 async function toggleTask(k,id){
   const t=(tasks[k]||[]).find(x=>x.id===id);
   if(!t) return;
   t.done=!t.done;
   saveData('df_tasks',tasks);renderTasks();renderCal();
   if(t.done) showToast('任務完成 ✓');
-  // 同步到雲端
-  try{ await sb.from('tasks').update({done:t.done}).eq('id',id); }catch(e){}
+  try{await sb.from('tasks').update({done:t.done}).eq('id',id);}catch(e){}
 }
+
 function openAddTask(){
+  editingTaskId=null;editingTaskKey=null;
+  document.getElementById('task-modal-title').textContent='新增任務';
   document.getElementById('task-input').value='';
+  document.getElementById('task-tag').value='work';
   document.getElementById('task-modal').classList.add('show');
   setTimeout(()=>document.getElementById('task-input').focus(),300);
 }
+
+function openEditTask(k,id){
+  const t=(tasks[k]||[]).find(x=>x.id===id);
+  if(!t) return;
+  editingTaskId=id;editingTaskKey=k;
+  document.getElementById('task-modal-title').textContent='編輯任務';
+  document.getElementById('task-input').value=t.text;
+  document.getElementById('task-tag').value=t.tag;
+  document.getElementById('task-modal').classList.add('show');
+  setTimeout(()=>document.getElementById('task-input').focus(),300);
+}
+
 async function saveTask(){
   const text=document.getElementById('task-input').value.trim();
   if(!text){showToast('請輸入任務名稱');return;}
   const tag=document.getElementById('task-tag').value;
-  const k=selKey();
   closeModal('task-modal');
-  // 先存本地
-  let newId=Date.now();
-  if(!tasks[k]) tasks[k]=[];
-  tasks[k].push({id:newId,text,tag,done:false});
-  saveData('df_tasks',tasks);renderCal();renderTasks();
-  showToast('已新增任務');
-  // 同步雲端
-  try{
-    const {data}=await sb.from('tasks').insert({date_key:k,text,tag,done:false}).select().single();
-    if(data){
-      // 用雲端 id 取代本地 id
-      const item=tasks[k].find(x=>x.id===newId);
-      if(item) item.id=data.id;
-      saveData('df_tasks',tasks);renderTasks();
-    }
-  }catch(e){}
+
+  if(editingTaskId){
+    // 編輯模式
+    const t=(tasks[editingTaskKey]||[]).find(x=>x.id===editingTaskId);
+    if(t){t.text=text;t.tag=tag;}
+    saveData('df_tasks',tasks);renderTasks();renderCal();
+    showToast('任務已更新');
+    try{await sb.from('tasks').update({text,tag}).eq('id',editingTaskId);}catch(e){}
+  } else {
+    // 新增模式
+    const k=selKey();
+    let newId=Date.now();
+    if(!tasks[k]) tasks[k]=[];
+    tasks[k].push({id:newId,text,tag,done:false});
+    saveData('df_tasks',tasks);renderCal();renderTasks();
+    showToast('已新增任務');
+    try{
+      const {data}=await sb.from('tasks').insert({date_key:k,text,tag,done:false}).select().single();
+      if(data){
+        const item=tasks[k].find(x=>x.id===newId);
+        if(item) item.id=data.id;
+        saveData('df_tasks',tasks);renderTasks();
+      }
+    }catch(e){}
+  }
+}
+
+function confirmDeleteTask(k,id,text){
+  showConfirm('刪除任務',`確定要刪除「${text}」嗎？`,async()=>{
+    tasks[k]=(tasks[k]||[]).filter(x=>x.id!==id);
+    if(tasks[k].length===0) delete tasks[k];
+    saveData('df_tasks',tasks);renderCal();renderTasks();
+    showToast('任務已刪除');
+    try{await sb.from('tasks').delete().eq('id',id);}catch(e){}
+  });
 }
 
 // ── TIMER ─────────────────────────────────────────────
@@ -465,10 +542,7 @@ function toggleTimer(){
           pomCount++;saveData('df_pom_'+todayKey(),pomCount);
           document.getElementById('s-today').textContent=pomCount;
           document.getElementById('s-min').textContent=pomCount*25;
-          // 同步雲端
-          try{
-            await sb.from('focus_stats').upsert({date_key:todayKey(),pom_count:pomCount},{onConflict:'date_key'});
-          }catch(e){}
+          try{await sb.from('focus_stats').upsert({date_key:todayKey(),pom_count:pomCount},{onConflict:'date_key'});}catch(e){}
         }
         if(Notification.permission==='granted'){
           new Notification('DailyFlow',{body:curMode==='work'?'番茄鐘完成！休息一下 🎉':'休息結束，繼續專注 💪',icon:'icons/icon-192x192.png'});
@@ -501,9 +575,13 @@ function renderHabitWeek(){
       `<div class="wday"><div class="wd-lbl">${DAYS[i]}</div><div class="wd-n${isT?' today':''}">${dd.getDate()}</div></div>`);
   }
 }
+
 function renderHabits(){
   const cards=document.getElementById('habit-cards');
-  if(!habits.length){cards.innerHTML=`<div class="empty-state"><i class="ti ti-refresh"></i>還沒有習慣<br><span style="font-size:13px">點右上角新增</span></div>`;return;}
+  if(!habits.length){
+    cards.innerHTML=`<div class="empty-state"><i class="ti ti-refresh"></i>還沒有習慣<br><span style="font-size:13px">點右上角新增</span></div>`;
+    return;
+  }
   const wStart=new Date(today);wStart.setDate(today.getDate()-today.getDay());
   cards.innerHTML=habits.map(h=>{
     const weekKeys=Array.from({length:7},(_,i)=>{const d=new Date(wStart);d.setDate(wStart.getDate()+i);return dateKey(d);});
@@ -518,7 +596,11 @@ function renderHabits(){
           <div class="hname">${h.name}</div>
           <div class="hstreak"><i class="ti ti-flame" style="font-size:13px;color:#EF4444"></i> 連續 ${h.streak} 天 · 累計 ${h.total} 天</div>
         </div>
-        <button class="hchk-btn${h.checks[tKey]?' on':''}" onclick="toggleHabitDay(${h.id},'${tKey}')">${h.checks[tKey]?'✓':''}</button>
+        <div class="hcard-actions">
+          <button class="hcard-btn" onclick="openEditHabit(${h.id})" aria-label="編輯"><i class="ti ti-pencil"></i></button>
+          <button class="hcard-btn del" onclick="confirmDeleteHabit(${h.id},'${h.name}')" aria-label="刪除"><i class="ti ti-trash"></i></button>
+          <button class="hchk-btn${h.checks[tKey]?' on':''}" onclick="toggleHabitDay(${h.id},'${tKey}')">${h.checks[tKey]?'✓':''}</button>
+        </div>
       </div>
       <div class="week-checks">${wcs}</div>
       <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:6px">
@@ -528,6 +610,7 @@ function renderHabits(){
     </div>`;
   }).join('');
 }
+
 async function toggleHabitDay(id,key){
   const h=habits.find(x=>x.id===id);if(!h) return;
   const was=!!h.checks[key];
@@ -535,38 +618,89 @@ async function toggleHabitDay(id,key){
   if(!was){h.total++;if(key===todayKey()) h.streak++;showToast(h.name+' 打卡成功 🎯');}
   else{h.total=Math.max(0,h.total-1);if(key===todayKey()) h.streak=Math.max(0,h.streak-1);}
   saveData('df_habits',habits);renderHabits();
-  // 同步雲端
-  try{ await sb.from('habits').update({checks:h.checks,streak:h.streak,total:h.total}).eq('id',id); }catch(e){}
+  try{await sb.from('habits').update({checks:h.checks,streak:h.streak,total:h.total}).eq('id',id);}catch(e){}
 }
+
 function openAddHabit(){
+  editingHabitId=null;
+  document.getElementById('habit-modal-title').textContent='新增習慣';
   document.getElementById('habit-input').value='';
+  document.getElementById('habit-emoji').value='⭐';
   document.getElementById('habit-modal').classList.add('show');
   setTimeout(()=>document.getElementById('habit-input').focus(),300);
 }
+
+function openEditHabit(id){
+  const h=habits.find(x=>x.id===id);if(!h) return;
+  editingHabitId=id;
+  document.getElementById('habit-modal-title').textContent='編輯習慣';
+  document.getElementById('habit-input').value=h.name;
+  document.getElementById('habit-emoji').value=h.icon;
+  document.getElementById('habit-modal').classList.add('show');
+  setTimeout(()=>document.getElementById('habit-input').focus(),300);
+}
+
 async function saveHabit(){
   const name=document.getElementById('habit-input').value.trim();
   if(!name){showToast('請輸入習慣名稱');return;}
   const icon=document.getElementById('habit-emoji').value;
-  const colors=['#FEF3C7','#DBEAFE','#D1FAE5','#FCE7F3','#F3E8FF'];
-  const color=colors[habits.length%colors.length];
   closeModal('habit-modal');
-  showToast('習慣已新增');
-  try{
-    const {data}=await sb.from('habits').insert({name,icon,color,streak:0,total:0,checks:{}}).select().single();
-    if(data){ habits.push({...data,checks:{}}); }
-    else { habits.push({id:Date.now(),name,icon,color,streak:0,total:0,checks:{}}); }
-  }catch(e){
-    habits.push({id:Date.now(),name,icon,color,streak:0,total:0,checks:{}});
+
+  if(editingHabitId){
+    // 編輯模式
+    const h=habits.find(x=>x.id===editingHabitId);
+    if(h){h.name=name;h.icon=icon;}
+    saveData('df_habits',habits);renderHabits();
+    showToast('習慣已更新');
+    try{await sb.from('habits').update({name,icon}).eq('id',editingHabitId);}catch(e){}
+  } else {
+    // 新增模式
+    const colors=['#FEF3C7','#DBEAFE','#D1FAE5','#FCE7F3','#F3E8FF'];
+    const color=colors[habits.length%colors.length];
+    showToast('習慣已新增');
+    try{
+      const {data}=await sb.from('habits').insert({name,icon,color,streak:0,total:0,checks:{}}).select().single();
+      if(data){habits.push({...data,checks:{}});}
+      else{habits.push({id:Date.now(),name,icon,color,streak:0,total:0,checks:{}});}
+    }catch(e){
+      habits.push({id:Date.now(),name,icon,color:'#DBEAFE',streak:0,total:0,checks:{}});
+    }
+    saveData('df_habits',habits);renderHabits();
   }
-  saveData('df_habits',habits);renderHabits();
 }
+
+function confirmDeleteHabit(id,name){
+  showConfirm('刪除習慣',`確定要刪除「${name}」嗎？所有打卡記錄也會一併刪除。`,async()=>{
+    habits=habits.filter(x=>x.id!==id);
+    saveData('df_habits',habits);renderHabits();
+    showToast('習慣已刪除');
+    try{await sb.from('habits').delete().eq('id',id);}catch(e){}
+  });
+}
+
+// ── CONFIRM DIALOG ────────────────────────────────────
+let confirmCallback=null;
+function showConfirm(title,msg,callback){
+  document.getElementById('confirm-title').textContent=title;
+  document.getElementById('confirm-msg').textContent=msg;
+  confirmCallback=callback;
+  document.getElementById('confirm-overlay').classList.add('show');
+}
+function closeConfirm(){
+  document.getElementById('confirm-overlay').classList.remove('show');
+  confirmCallback=null;
+}
+document.getElementById('confirm-ok-btn').addEventListener('click',()=>{
+  if(confirmCallback) confirmCallback();
+  closeConfirm();
+});
 
 // ── MODAL / TOAST ─────────────────────────────────────
 function closeModal(id,e){
   if(e&&e.target!==document.getElementById(id)) return;
   document.getElementById(id).classList.remove('show');
 }
-let toastTimer,toastPersist=false;
+let toastTimer;
 function showToast(msg,duration=2200){
   const t=document.getElementById('toast');
   t.textContent=msg;t.classList.add('show');
@@ -584,20 +718,20 @@ document.addEventListener('keydown',e=>{
     if(document.getElementById('task-modal').classList.contains('show')) saveTask();
     if(document.getElementById('habit-modal').classList.contains('show')) saveHabit();
   }
-  if(e.key==='Escape') document.querySelectorAll('.overlay.show').forEach(o=>o.classList.remove('show'));
+  if(e.key==='Escape'){
+    document.querySelectorAll('.overlay.show').forEach(o=>o.classList.remove('show'));
+    closeConfirm();
+  }
 });
 
 // ── SW ────────────────────────────────────────────────
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
-}
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
 
 // ── INIT ──────────────────────────────────────────────
 renderCal();renderTasks();updateRing();
 renderHabitWeek();renderHabits();
 document.getElementById('s-today').textContent=pomCount;
 document.getElementById('s-min').textContent=pomCount*25;
-// 啟動時自動從雲端同步
 syncFromCloud();
 </script>
 </body>
