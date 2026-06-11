@@ -134,6 +134,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .wc.today-marker{border-width:2px;border-color:var(--blue)}
 .pbar{height:4px;background:var(--bg);border-radius:2px;overflow:hidden}
 .pfill{height:100%;background:var(--blue);border-radius:2px;transition:width .4s}
+.habit-stat{margin:0 16px 8px;background:linear-gradient(135deg,#2563EB,#1D4ED8);color:#fff;border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.habit-stat-num{font-size:24px;font-weight:700;line-height:1}
+.habit-stat-txt{font-size:12px;opacity:.85;margin-top:2px}
+.heat-wrap{overflow:hidden;max-height:0;transition:max-height .35s ease}
+.heat-wrap.open{max-height:110px}
+.heat-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:6px 0 3px}
+.heat-cell{height:14px;border-radius:2px;background:var(--border)}
+.heat-cell.on{background:rgba(37,99,235,.55)}
+.heat-cell.today{background:var(--blue)}
+.heat-toggle{display:flex;align-items:center;justify-content:center;gap:4px;font-size:11px;color:var(--text3);cursor:pointer;padding:4px 0;margin-top:4px;user-select:none}
+.heat-toggle:active{color:var(--text2)}
 
 /* MODAL */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;z-index:100;opacity:0;pointer-events:none;transition:.25s}
@@ -246,6 +257,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <span style="font-size:16px;font-weight:600">習慣追蹤</span>
         <button style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:13px;display:flex;align-items:center;gap:4px" onclick="openAddHabit()"><i class="ti ti-plus"></i>新增習慣</button>
       </div>
+      <div id="habit-stat" class="habit-stat" style="display:none"></div>
       <div class="habit-week" id="habit-week"></div>
       <div class="habit-cards" id="habit-cards"></div>
     </div>
@@ -564,6 +576,12 @@ function pickTask(){
 }
 
 // ── HABITS ────────────────────────────────────────────
+function calcStreak(checks){
+  let streak=0;const d=new Date(today);
+  if(!checks[dateKey(d)]) d.setDate(d.getDate()-1);
+  while(checks[dateKey(d)]){streak++;d.setDate(d.getDate()-1);}
+  return streak;
+}
 function renderHabitWeek(){
   const row=document.getElementById('habit-week');
   const start=new Date(today);start.setDate(today.getDate()-today.getDay());
@@ -577,18 +595,33 @@ function renderHabitWeek(){
 }
 
 function renderHabits(){
+  const tKey=todayKey();
+  const statEl=document.getElementById('habit-stat');
+  if(habits.length){
+    const doneCnt=habits.filter(h=>h.checks[tKey]).length;
+    const total=habits.length;
+    const emoji=doneCnt===total?'🎉':doneCnt>0?'💪':'🎯';
+    statEl.style.display='flex';
+    statEl.innerHTML=`<div><div class="habit-stat-num">${doneCnt}/${total}</div><div class="habit-stat-txt">今日習慣已完成</div></div><div style="font-size:28px">${emoji}</div>`;
+  }else{statEl.style.display='none';}
+
   const cards=document.getElementById('habit-cards');
   if(!habits.length){
     cards.innerHTML=`<div class="empty-state"><i class="ti ti-refresh"></i>還沒有習慣<br><span style="font-size:13px">點右上角新增</span></div>`;
     return;
   }
   const wStart=new Date(today);wStart.setDate(today.getDate()-today.getDay());
+  const hStart=new Date(today);hStart.setDate(today.getDate()-today.getDay()-21);
   cards.innerHTML=habits.map(h=>{
     const weekKeys=Array.from({length:7},(_,i)=>{const d=new Date(wStart);d.setDate(wStart.getDate()+i);return dateKey(d);});
     const done=weekKeys.filter(k=>h.checks[k]).length;
     const pct=Math.round(done/7*100);
-    const tKey=todayKey();
     const wcs=weekKeys.map((k,i)=>`<div class="wc${h.checks[k]?' done':''}${k===tKey?' today-marker':''}" onclick="toggleHabitDay(${h.id},'${k}')">${h.checks[k]?'✓':''}</div>`).join('');
+    const heatCells=Array.from({length:28},(_,i)=>{
+      const d=new Date(hStart);d.setDate(hStart.getDate()+i);
+      const k=dateKey(d);
+      return `<div class="heat-cell${h.checks[k]?' on':''}${k===tKey?' today':''}" title="${d.getMonth()+1}/${d.getDate()}${h.checks[k]?' ✓':''}"></div>`;
+    }).join('');
     return `<div class="hcard">
       <div class="hcard-top">
         <div class="hicon" style="background:${h.color}">${h.icon}</div>
@@ -607,6 +640,11 @@ function renderHabits(){
         <span style="font-size:12px;color:var(--text2)">本週 ${pct}%</span>
       </div>
       <div class="pbar"><div class="pfill" style="width:${pct}%"></div></div>
+      <div class="heat-toggle" onclick="toggleHabitHistory(${h.id})"><i class="ti ti-chart-bar" style="font-size:13px"></i>過去 4 週記錄</div>
+      <div class="heat-wrap" id="heat-${h.id}">
+        <div class="heat-grid">${heatCells}</div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);padding:0 1px"><span>4 週前</span><span>本週</span></div>
+      </div>
     </div>`;
   }).join('');
 }
@@ -615,10 +653,15 @@ async function toggleHabitDay(id,key){
   const h=habits.find(x=>x.id===id);if(!h) return;
   const was=!!h.checks[key];
   h.checks[key]=was?0:1;
-  if(!was){h.total++;if(key===todayKey()) h.streak++;showToast(h.name+' 打卡成功 🎯');}
-  else{h.total=Math.max(0,h.total-1);if(key===todayKey()) h.streak=Math.max(0,h.streak-1);}
+  if(!was){h.total++;showToast(h.name+' 打卡成功 🎯');}
+  else{h.total=Math.max(0,h.total-1);}
+  h.streak=calcStreak(h.checks);
   saveData('df_habits',habits);renderHabits();
   try{await sb.from('habits').update({checks:h.checks,streak:h.streak,total:h.total}).eq('id',id);}catch(e){}
+}
+function toggleHabitHistory(id){
+  const el=document.getElementById('heat-'+id);
+  if(el) el.classList.toggle('open');
 }
 
 function openAddHabit(){
