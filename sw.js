@@ -1,4 +1,4 @@
-const CACHE = 'dailyflow-v2';
+const CACHE = 'dailyflow-v3';
 
 self.addEventListener('install', e => {
   e.waitUntil(self.skipWaiting());
