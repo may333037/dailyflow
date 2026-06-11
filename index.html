@@ -413,6 +413,31 @@ let taskSearch={active:false,query:'',tag:'',status:''};
 async function syncFromCloud(){
   showToast('同步中... ☁️',5000);
   try{
+    // 1. 推送本地任務到雲端（數字ID=離線建立需insert，字串UUID=已同步需upsert）
+    for(const [date_key,list] of Object.entries(tasks)){
+      for(const t of list){
+        if(typeof t.id==='number'){
+          const {data}=await sb.from('tasks').insert({date_key,text:t.text,tag:t.tag,done:t.done}).select().single();
+          if(data) t.id=data.id;
+        } else {
+          await sb.from('tasks').upsert({id:t.id,date_key,text:t.text,tag:t.tag,done:t.done});
+        }
+      }
+    }
+    saveData('df_tasks',tasks);
+
+    // 2. 推送本地習慣到雲端
+    for(const h of habits){
+      if(typeof h.id==='number'){
+        const {data}=await sb.from('habits').insert({name:h.name,icon:h.icon,color:h.color,streak:h.streak,total:h.total,checks:h.checks}).select().single();
+        if(data) h.id=data.id;
+      } else {
+        await sb.from('habits').upsert({id:h.id,name:h.name,icon:h.icon,color:h.color,streak:h.streak,total:h.total,checks:h.checks});
+      }
+    }
+    saveData('df_habits',habits);
+
+    // 3. 從雲端拉取最新資料
     const {data:tData,error:tErr}=await sb.from('tasks').select('*');
     if(!tErr&&tData){
       tasks={};
