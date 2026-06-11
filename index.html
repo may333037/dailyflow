@@ -216,6 +216,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <div class="header-sub" id="hdr-sub">載入中...</div>
       </div>
       <div class="header-actions">
+        <button class="hdr-btn" id="install-btn" onclick="installApp()" style="display:none" aria-label="安裝應用程式"><i class="ti ti-download"></i></button>
         <button class="hdr-btn" onclick="syncFromCloud()" aria-label="同步"><i class="ti ti-cloud-upload"></i></button>
         <button class="hdr-btn" onclick="showNotifPrompt()" aria-label="通知"><i class="ti ti-bell"></i></button>
       </div>
@@ -964,6 +965,29 @@ document.addEventListener('keydown',e=>{
 
 // ── SW ────────────────────────────────────────────────
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+
+// ── PWA 安裝 ──────────────────────────────────────────
+let deferredInstallPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  deferredInstallPrompt=e;
+  document.getElementById('install-btn').style.display='';
+});
+window.addEventListener('appinstalled',()=>{
+  deferredInstallPrompt=null;
+  document.getElementById('install-btn').style.display='none';
+  showToast('已安裝到主畫面 ✓');
+});
+function installApp(){
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.then(()=>{deferredInstallPrompt=null;});
+  } else if(/iPhone|iPad|iPod/.test(navigator.userAgent)){
+    showToast('請點底部分享按鈕 → 加入主畫面',5000);
+  } else {
+    showToast('請從瀏覽器選單選擇「安裝應用程式」',4000);
+  }
+}
 
 // ── INIT ──────────────────────────────────────────────
 renderCal();renderTasks();updateRing();
