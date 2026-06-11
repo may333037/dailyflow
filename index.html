@@ -146,6 +146,38 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .heat-toggle{display:flex;align-items:center;justify-content:center;gap:4px;font-size:11px;color:var(--text3);cursor:pointer;padding:4px 0;margin-top:4px;user-select:none}
 .heat-toggle:active{color:var(--text2)}
 
+/* TASK SEARCH */
+.search-panel{padding:0 20px;overflow:hidden;max-height:0;transition:max-height .3s ease}
+.search-panel.show{max-height:140px}
+.search-input-wrap{position:relative;margin-bottom:8px}
+.search-input-wrap i{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:15px;pointer-events:none}
+.search-input{width:100%;padding:9px 12px 9px 34px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;background:var(--bg);color:var(--text);outline:none}
+.search-input:focus{border-color:var(--blue)}
+.filter-row{display:flex;gap:5px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none}
+.filter-row::-webkit-scrollbar{display:none}
+.filter-chip{padding:5px 10px;border-radius:14px;font-size:12px;cursor:pointer;border:1px solid var(--border);color:var(--text2);background:var(--surface);white-space:nowrap;transition:.15s;user-select:none;flex-shrink:0}
+.filter-chip.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.search-date-lbl{font-size:11px;color:var(--text3);font-weight:600;letter-spacing:.04em;padding:8px 0 4px}
+
+/* STATS OVERLAY */
+.stats-overlay{position:fixed;inset:0;background:var(--bg);z-index:150;transform:translateX(100%);transition:transform .3s ease;display:flex;flex-direction:column}
+.stats-overlay.show{transform:none}
+.stats-hdr{background:var(--blue);color:#fff;padding:env(safe-area-inset-top,12px) 20px 14px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.stats-back{background:rgba(255,255,255,.2);border:none;border-radius:8px;padding:6px 10px;color:#fff;cursor:pointer;font-size:18px;line-height:1}
+.stats-body{flex:1;overflow-y:auto;padding:16px 20px calc(40px + env(safe-area-inset-bottom,0px))}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.scard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center}
+.scard-val{font-size:24px;font-weight:700;color:var(--blue)}
+.scard-lbl{font-size:11px;color:var(--text2);margin-top:3px}
+.hsr{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px}
+.hsr-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.hsr-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.hsr-name{font-size:14px;font-weight:600}
+.hsr-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px}
+.hsr-stat{text-align:center}
+.hsr-val{font-size:16px;font-weight:600}
+.hsr-lbl{font-size:10px;color:var(--text2);margin-top:1px}
+
 /* MODAL */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;z-index:100;opacity:0;pointer-events:none;transition:.25s}
 .overlay.show{opacity:1;pointer-events:all}
@@ -205,7 +237,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </div>
       <div class="cal-grid" id="cal-grid"></div>
       <div class="tasks-wrap">
-        <div class="section-label" id="task-lbl">今天的任務</div>
+        <div class="section-label" style="display:flex;align-items:center;justify-content:space-between">
+          <span id="task-lbl">今天的任務</span>
+          <button onclick="toggleTaskSearch()" style="background:none;border:none;cursor:pointer;color:var(--blue);padding:2px 4px;font-size:16px;line-height:1"><i class="ti ti-search" id="search-icon"></i></button>
+        </div>
+        <div class="search-panel" id="task-search-panel">
+          <div class="search-input-wrap"><i class="ti ti-search"></i><input class="search-input" id="task-search-input" type="search" placeholder="搜尋所有任務..." oninput="onSearchInput(this.value)"/></div>
+          <div class="filter-row">
+            <div class="filter-chip active" data-group="tag" data-val="" onclick="setFilter(this)">全部</div>
+            <div class="filter-chip" data-group="tag" data-val="work" onclick="setFilter(this)">工作</div>
+            <div class="filter-chip" data-group="tag" data-val="life" onclick="setFilter(this)">生活</div>
+            <div class="filter-chip" data-group="tag" data-val="health" onclick="setFilter(this)">健身</div>
+            <div class="filter-chip active" data-group="status" data-val="" onclick="setFilter(this)">全部狀態</div>
+            <div class="filter-chip" data-group="status" data-val="todo" onclick="setFilter(this)">待辦</div>
+            <div class="filter-chip" data-group="status" data-val="done" onclick="setFilter(this)">完成</div>
+          </div>
+        </div>
         <div id="task-list"></div>
       </div>
       <button class="add-btn" onclick="openAddTask()"><i class="ti ti-plus"></i>新增任務</button>
@@ -255,7 +302,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="section" id="tab-habit">
       <div class="habit-hdr">
         <span style="font-size:16px;font-weight:600">習慣追蹤</span>
-        <button style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:13px;display:flex;align-items:center;gap:4px" onclick="openAddHabit()"><i class="ti ti-plus"></i>新增習慣</button>
+        <div style="display:flex;gap:8px">
+          <button style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:13px;display:flex;align-items:center;gap:4px" onclick="openStats()"><i class="ti ti-chart-bar"></i>統計</button>
+          <button style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:13px;display:flex;align-items:center;gap:4px" onclick="openAddHabit()"><i class="ti ti-plus"></i>新增習慣</button>
+        </div>
       </div>
       <div id="habit-stat" class="habit-stat" style="display:none"></div>
       <div class="habit-week" id="habit-week"></div>
@@ -263,6 +313,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
 
   </div>
+</div>
+
+<!-- 習慣統計 -->
+<div class="stats-overlay" id="stats-overlay">
+  <div class="stats-hdr">
+    <button class="stats-back" onclick="closeStats()"><i class="ti ti-arrow-left"></i></button>
+    <span style="font-size:17px;font-weight:600">習慣統計</span>
+  </div>
+  <div class="stats-body" id="stats-body"></div>
 </div>
 
 <!-- 新增/編輯任務 -->
@@ -348,6 +407,7 @@ let pomCount=loadData('df_pom_'+dateKey(today),0);
 // 編輯狀態
 let editingTaskId=null, editingTaskKey=null;
 let editingHabitId=null;
+let taskSearch={active:false,query:'',tag:'',status:''};
 
 // ── SUPABASE SYNC ─────────────────────────────────────
 async function syncFromCloud(){
@@ -363,11 +423,15 @@ async function syncFromCloud(){
       saveData('df_tasks',tasks);
     }
     const {data:hData,error:hErr}=await sb.from('habits').select('*');
-    if(!hErr&&hData&&hData.length){
-      habits=hData.map(h=>({id:h.id,name:h.name,icon:h.icon,color:h.color,streak:h.streak,total:h.total,checks:h.checks||{}}));
-      saveData('df_habits',habits);
-    } else if(!hErr&&(!hData||!hData.length)&&!habits.length){
-      await addDefaultHabits();
+    if(!hErr&&hData){
+      if(hData.length){
+        habits=hData.map(h=>({id:h.id,name:h.name,icon:h.icon,color:h.color,streak:h.streak,total:h.total,checks:h.checks||{}}));
+        saveData('df_habits',habits);
+      } else if(!habits.length){
+        await addDefaultHabits();
+      } else {
+        habits=[];saveData('df_habits',habits);
+      }
     }
     const {data:fData}=await sb.from('focus_stats').select('*').eq('date_key',todayKey()).maybeSingle();
     if(fData){pomCount=fData.pom_count;saveData('df_pom_'+todayKey(),pomCount);}
@@ -431,26 +495,55 @@ function selectDay(d){selDay=d;renderCal();renderTasks();}
 function changeMonth(dir){calDate=new Date(calDate.getFullYear(),calDate.getMonth()+dir,1);renderCal();renderTasks();}
 
 // ── TASKS ─────────────────────────────────────────────
-function renderTasks(){
-  const k=selKey();const list=tasks[k]||[];
-  document.getElementById('task-lbl').textContent=k===todayKey()?'今天的任務':`${selDay} 日的任務`;
-  const c=document.getElementById('task-list');
-  if(!list.length){
-    c.innerHTML=`<div class="empty-state"><i class="ti ti-clipboard-list"></i>這天沒有任務<br><span style="font-size:13px">點下方新增</span></div>`;
-    return;
-  }
-  c.innerHTML=list.map(t=>`
-    <div class="task-item">
+function taskItemHtml(k,t){
+  return `<div class="task-item">
       <div class="chk${t.done?' done':''}" onclick="toggleTask('${k}',${t.id})"></div>
-      <div class="task-body" onclick="toggleTask('${k}',${t.id})">
-        <div class="task-name${t.done?' done':''}">${t.text}</div>
-      </div>
+      <div class="task-body" onclick="toggleTask('${k}',${t.id})"><div class="task-name${t.done?' done':''}">${t.text}</div></div>
       <span class="tag tag-${t.tag}">${TAG_LABEL[t.tag]}</span>
       <div class="task-actions">
         <button class="task-action-btn" onclick="openEditTask('${k}',${t.id})" aria-label="編輯"><i class="ti ti-pencil"></i></button>
         <button class="task-action-btn del" onclick="confirmDeleteTask('${k}',${t.id},'${t.text}')" aria-label="刪除"><i class="ti ti-trash"></i></button>
       </div>
-    </div>`).join('');
+    </div>`;
+}
+function fmtDateLbl(k){
+  const [y,m,d]=k.split('-').map(Number);
+  const dt=new Date(y,m-1,d);
+  const dow=['日','一','二','三','四','五','六'][dt.getDay()];
+  return `${y}/${m}/${d}（${dow}）${k===todayKey()?' · 今天':''}`;
+}
+function renderTasks(){
+  const c=document.getElementById('task-list');
+  const searching=taskSearch.active&&(taskSearch.query||taskSearch.tag||taskSearch.status);
+  if(searching){
+    let res=[];
+    Object.entries(tasks).forEach(([dk,list])=>{
+      list.forEach(t=>{
+        if(taskSearch.query&&!t.text.toLowerCase().includes(taskSearch.query)) return;
+        if(taskSearch.tag&&t.tag!==taskSearch.tag) return;
+        if(taskSearch.status==='todo'&&t.done) return;
+        if(taskSearch.status==='done'&&!t.done) return;
+        res.push({...t,dk});
+      });
+    });
+    res.sort((a,b)=>{
+      const [ay,am,ad]=a.dk.split('-').map(Number),[by,bm,bd]=b.dk.split('-').map(Number);
+      return new Date(ay,am-1,ad)-new Date(by,bm-1,bd);
+    });
+    document.getElementById('task-lbl').textContent=`找到 ${res.length} 筆`;
+    if(!res.length){c.innerHTML=`<div class="empty-state"><i class="ti ti-search"></i>沒有符合的任務</div>`;return;}
+    let html='',last='';
+    res.forEach(t=>{
+      if(t.dk!==last){html+=`<div class="search-date-lbl">${fmtDateLbl(t.dk)}</div>`;last=t.dk;}
+      html+=taskItemHtml(t.dk,t);
+    });
+    c.innerHTML=html;
+    return;
+  }
+  const k=selKey();const list=tasks[k]||[];
+  document.getElementById('task-lbl').textContent=k===todayKey()?'今天的任務':`${selDay} 日的任務`;
+  if(!list.length){c.innerHTML=`<div class="empty-state"><i class="ti ti-clipboard-list"></i>這天沒有任務<br><span style="font-size:13px">點下方新增</span></div>`;return;}
+  c.innerHTML=list.map(t=>taskItemHtml(k,t)).join('');
 }
 
 async function toggleTask(k,id){
@@ -755,6 +848,81 @@ function showNotifPrompt(){
   Notification.requestPermission().then(p=>showToast(p==='granted'?'已開啟提醒通知 🔔':'提醒通知未開啟'));
 }
 
+// ── TASK SEARCH ───────────────────────────────────────
+function toggleTaskSearch(){
+  taskSearch.active=!taskSearch.active;
+  document.getElementById('task-search-panel').classList.toggle('show',taskSearch.active);
+  document.getElementById('search-icon').className=taskSearch.active?'ti ti-x':'ti ti-search';
+  if(!taskSearch.active){
+    taskSearch.query='';taskSearch.tag='';taskSearch.status='';
+    document.getElementById('task-search-input').value='';
+    document.querySelectorAll('#task-search-panel .filter-chip').forEach(c=>c.classList.toggle('active',c.dataset.val===''));
+  }
+  renderTasks();
+  if(taskSearch.active) setTimeout(()=>document.getElementById('task-search-input').focus(),300);
+}
+function onSearchInput(val){taskSearch.query=(val||'').trim().toLowerCase();renderTasks();}
+function setFilter(el){
+  const g=el.dataset.group,v=el.dataset.val;
+  el.closest('.filter-row').querySelectorAll(`[data-group="${g}"]`).forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  taskSearch[g]=v;
+  renderTasks();
+}
+
+// ── HABIT STATS ───────────────────────────────────────
+function calcBestStreak(checks){
+  const keys=Object.keys(checks).filter(k=>checks[k]).sort((a,b)=>{
+    const [ay,am,ad]=a.split('-').map(Number),[by,bm,bd]=b.split('-').map(Number);
+    return new Date(ay,am-1,ad)-new Date(by,bm-1,bd);
+  });
+  if(!keys.length) return 0;
+  let best=1,cur=1;
+  for(let i=1;i<keys.length;i++){
+    const [py,pm,pd]=keys[i-1].split('-').map(Number),[cy,cm,cd]=keys[i].split('-').map(Number);
+    const diff=(new Date(cy,cm-1,cd)-new Date(py,pm-1,pd))/86400000;
+    if(diff===1){cur++;best=Math.max(best,cur);}else cur=1;
+  }
+  return best;
+}
+function calcMonthRate(checks){
+  const y=today.getFullYear(),m=today.getMonth()+1,d=today.getDate();
+  let cnt=0;for(let i=1;i<=d;i++) if(checks[`${y}-${m}-${i}`]) cnt++;
+  return Math.round(cnt/d*100);
+}
+function openStats(){
+  const tKey=todayKey();
+  const todayDone=habits.filter(h=>h.checks[tKey]).length;
+  const totalCheckins=habits.reduce((s,h)=>s+h.total,0);
+  const avgStreak=habits.length?Math.round(habits.reduce((s,h)=>s+h.streak,0)/habits.length):0;
+  let html=`<div class="stats-grid">
+    <div class="scard"><div class="scard-val">${habits.length}</div><div class="scard-lbl">追蹤習慣數</div></div>
+    <div class="scard"><div class="scard-val">${todayDone}/${habits.length}</div><div class="scard-lbl">今日完成</div></div>
+    <div class="scard"><div class="scard-val">${avgStreak}</div><div class="scard-lbl">平均連續天</div></div>
+    <div class="scard"><div class="scard-val">${totalCheckins}</div><div class="scard-lbl">累計打卡次</div></div>
+  </div><div class="section-label" style="margin-bottom:12px">各習慣詳情</div>`;
+  habits.forEach(h=>{
+    const best=calcBestStreak(h.checks);
+    const mRate=calcMonthRate(h.checks);
+    const wStart=new Date(today);wStart.setDate(today.getDate()-today.getDay());
+    const wDone=Array.from({length:7},(_,i)=>{const d=new Date(wStart);d.setDate(wStart.getDate()+i);return dateKey(d);}).filter(k=>h.checks[k]).length;
+    html+=`<div class="hsr">
+      <div class="hsr-top"><div class="hsr-icon" style="background:${h.color}">${h.icon}</div><div class="hsr-name">${h.name}</div></div>
+      <div class="hsr-grid">
+        <div class="hsr-stat"><div class="hsr-val">${h.streak}</div><div class="hsr-lbl">目前連續</div></div>
+        <div class="hsr-stat"><div class="hsr-val">${best}</div><div class="hsr-lbl">最長連續</div></div>
+        <div class="hsr-stat"><div class="hsr-val">${Math.round(wDone/7*100)}%</div><div class="hsr-lbl">本週完成</div></div>
+        <div class="hsr-stat"><div class="hsr-val">${mRate}%</div><div class="hsr-lbl">本月完成</div></div>
+      </div>
+      <div class="pbar"><div class="pfill" style="width:${mRate}%"></div></div>
+    </div>`;
+  });
+  if(!habits.length) html+=`<div class="empty-state"><i class="ti ti-chart-bar"></i>還沒有習慣資料</div>`;
+  document.getElementById('stats-body').innerHTML=html;
+  document.getElementById('stats-overlay').classList.add('show');
+}
+function closeStats(){document.getElementById('stats-overlay').classList.remove('show');}
+
 // ── KEYBOARD ──────────────────────────────────────────
 document.addEventListener('keydown',e=>{
   if(e.key==='Enter'){
@@ -764,6 +932,8 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
     document.querySelectorAll('.overlay.show').forEach(o=>o.classList.remove('show'));
     closeConfirm();
+    closeStats();
+    if(taskSearch.active) toggleTaskSearch();
   }
 });
 
